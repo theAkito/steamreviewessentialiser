@@ -2,10 +2,10 @@
 
 version       = "0.1.0"
 author        = "Akito <the@akito.ooo>"
-description   = "A new awesome nimble nimpackage."
+description   = "Extract most used words from Steam Reviews to create an aggregated list of most used keywords represented as a tag cloud."
 license       = "GPL-3.0-or-later"
 srcDir        = "src"
-bin           = @["nimpackage"]
+bin           = @["steamreviewessentialiser"]
 skipDirs      = @["tasks"]
 skipFiles     = @["README.md"]
 skipExt       = @["nim"]
@@ -13,7 +13,7 @@ skipExt       = @["nim"]
 
 # Dependencies
 
-requires "nim >= 1.4.0"
+requires "nim >= 1.6.4"
 
 
 # Tasks
@@ -33,15 +33,15 @@ task fbuild, "Build project.":
   exec """nim c \
             --define:danger \
             --opt:speed \
-            --out:nimpackage \
-            src/nimpackage
+            --out:steamreviewessentialiser \
+            src/steamreviewessentialiser
        """
 task dbuild, "Debug Build project.":
   exec """nim c \
             --define:debug:true \
             --debuginfo:on \
-            --out:nimpackage \
-            src/nimpackage
+            --out:steamreviewessentialiser \
+            src/steamreviewessentialiser
        """
 task makecfg, "Create nim.cfg for optimized builds.":
   exec "nim tasks/cfg_optimized.nims"
