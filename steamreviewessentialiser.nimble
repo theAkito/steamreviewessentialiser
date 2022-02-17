@@ -2,7 +2,7 @@
 
 version       = "0.1.0"
 author        = "Akito <the@akito.ooo>"
-description   = "Extract most used words from Steam Reviews to create an aggregated list of most used keywords represented as a tag cloud."
+description   = "Extract most used words from Steam reviews to create an aggregated list of most used keywords represented as a tag cloud."
 license       = "GPL-3.0-or-later"
 srcDir        = "src"
 bin           = @["steamreviewessentialiser"]

@@ -1,33 +1,41 @@
 [![nimble](https://raw.githubusercontent.com/yglukhov/nimble-tag/master/nimble.png)](https://nimble.directory/pkg/steamreviewessentialiser)
 
+[![Source](https://img.shields.io/badge/project-source-2a2f33?style=plastic)](https://github.com/theAkito/steamreviewessentialiser)
 [![Language](https://img.shields.io/badge/language-Nim-orange.svg?style=plastic)](https://nim-lang.org/)
+
+![Last Commit](https://img.shields.io/github/last-commit/theAkito/steamreviewessentialiser?style=plastic)
 
 [![GitHub](https://img.shields.io/badge/license-GPL--3.0-informational?style=plastic)](https://www.gnu.org/licenses/gpl-3.0.txt)
 [![Liberapay patrons](https://img.shields.io/liberapay/patrons/Akito?style=plastic)](https://liberapay.com/Akito/)
 
 ## What
-This is a base template for App projects written in Nim.
+Fetches all reviews from a Steam game, then aggregates keywords found in them. Finally, the keywords are displayed in a tag cloud, where the most used keywords are shown biggest and the least used ones are shown smallest.
+This way, you can get a first impression about a Steam game, within a minute of reading, instead of reading a couple reviews for 20 minutes, for example.
 
 ## Why
-Allows kickstarting new projects, without fiddling around with metadata basics.
+I like to read Steam reviews. Sometimes I do it, to quickly grasp what issues might arise from the game. For example, it's not fun to play a theoretically good game, which is in reality riddled with bugs.
+So, if most negative reviews mention the word "bug" I can quickly see that word pointed out to me in the displayed tag cloud, when using this app.
 
 ## How
-Select this is a template, when creating a new Git repository through a Git WebUI
+Work in Progress
 
 ## Where
-Git.
+Linux
 
 ## Goals
-* Performance
+* Maintain Simplicity!
 
 ## Project Status
-Stable
+Before Pre-Alpha. Unstable API.
 
 ## TODO
-* Always improve
+* Save state, if review gathering was interrupted by program shutdown.
+* Use spell correction to correctly group similar or same words.
+* Maintain openness to variety of clients on different platforms.
+* REST API
 
 ## License
-Copyright (C) 2020  Akito <the@akito.ooo>
+Copyright © 2022  Akito <the@akito.ooo>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
