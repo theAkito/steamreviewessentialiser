@@ -31,6 +31,50 @@ type
     purchase_type * : string
     num_per_page  * : string
 
+  SteamQuerySummaryRes * = ref object
+    num_reviews       * : Option[int]
+    review_score      * : Option[int]
+    review_score_desc * : Option[string]
+    total_positive    * : Option[int64]
+    total_negative    * : Option[int64]
+    total_reviews     * : Option[int64]
+
+  SteamReviewAutherRes * = ref object
+    steamid                 * : string
+    num_games_owned         * : int64
+    num_reviews             * : int64
+    playtime_forever        * : int64
+    playtime_last_two_weeks * : int64
+    playtime_at_review      * : int64
+    last_played             * : int64
+
+  SteamReviewItemRes * = ref object
+    recommendationid            * : string
+    author                      * : SteamReviewAutherRes
+    language                    * : string
+    review                      * : string
+    timestamp_created           * : int64
+    timestamp_updated           * : int64
+    voted_up                    * : bool
+    votes_up                    * : int64
+    votes_funny                 * : int64
+    weighted_vote_score         * : JsonNode # JString or JInt
+    comment_count               * : int64
+    steam_purchase              * : bool
+    received_for_free           * : bool
+    written_during_early_access * : bool
+    developer_response          * : Option[string]
+    timestamp_dev_responded     * : Option[string]
+
+  SteamReviewsRes * = ref object
+    success       * : int
+    query_summary * : Option[SteamQuerySummaryRes]
+    cursor        * : string
+    reviews       * : Option[seq[SteamReviewItemRes]]
+
+let
+  log = "reviews_csgo.log".open(fmWrite)
+
 func genRequestUrl(query: SteamReviewQuery, fresh = false#[ Set to `true` on first request!]#): Url =
   ## Do not encode `query.cursor` manually! cURL encodes already!
   let
@@ -56,6 +100,10 @@ func genRequestUrl(query: SteamReviewQuery, fresh = false#[ Set to `true` on fir
     query: queries
   )
 
+proc writeBatchSection(batch: SteamReviewsRes) =
+  log.writeLine(pretty(%* batch))
+  log.writeLine("---")
+
 proc genRequest(ctx: SteamContext, fresh = false#[ Set to `true` on first request!]#): Request =
   let
     query = SteamReviewQuery(
@@ -73,7 +121,7 @@ proc genRequest(ctx: SteamContext, fresh = false#[ Set to `true` on first reques
     verb: "get"
   )
 
-proc retrieveReviewBatch(ctx: SteamContext, fresh = false#[ Set to `true` on first request!]#): JsonNode =
+proc retrieveReviewBatch(ctx: SteamContext, fresh = false#[ Set to `true` on first request!]#): SteamReviewsRes =
   let
     req = genRequest(ctx, fresh)
     resp = req.fetch()
@@ -82,41 +130,41 @@ proc retrieveReviewBatch(ctx: SteamContext, fresh = false#[ Set to `true` on fir
       try: resp.body.parseJson()
       except: raise SteamDefect.newException(exceptMsgMsgPostErrorParse)
     respBody = jResp.pretty
-  jResp
+  try:
+    jResp.to(SteamReviewsRes)
+  except:
+    echo jResp{"query_summary"}.pretty
+    raise getCurrentException()
 
-proc retrieveReviewsAll(ctx: SteamContext): seq[JsonNode] =
+proc retrieveReviewsAll(ctx: SteamContext): seq[SteamReviewsRes] =
   var
     count: int = 0
     cursorPrevious = "*"
   ctx.cursor = cursorPrevious
   let
-    log = "reviews_csgo.log".open(fmWrite)
     batchFirst = ctx.retrieveReviewBatch(true)
-  cursorPrevious = batchFirst["cursor"].getStr()
-  echo batchFirst["query_summary"]["num_reviews"].getInt()
+  cursorPrevious = batchFirst.cursor
   let
     reviewsTotal = try:
-        batchFirst["query_summary"]["total_reviews"].getInt()
+        batchFirst.query_summary.get().total_reviews.get()
       except:
-        echo batchFirst.pretty
+        echo pretty(%* batchFirst)
         raise getCurrentException()
-  log.writeLine(batchFirst.pretty)
-  log.writeLine("---")
-  for i in 1..round(reviewsTotal / 20).toInt() - 1:
+  batchFirst.writeBatchSection()
+  for i in 1..round(reviewsTotal.int / 100).toInt() - 1:
     ctx.cursor = cursorPrevious
     let
       fresh = if i == 1: true else: false
       batch = retrieveReviewBatch(ctx, fresh)
     count.inc
-    log.writeLine(batch.pretty)
-    log.writeLine("---")
-    cursorPrevious = batch["cursor"].getStr()
+    batch.writeBatchSection()
+    cursorPrevious = batch.cursor
     sleep 10_000
 
 
 when isMainModule:
-  echo retrieveReviewsAll(
+  echo pretty(%* retrieveReviewsAll(
     ctx = SteamContext(
       appid: "730"
     )
-  )
+  ))
