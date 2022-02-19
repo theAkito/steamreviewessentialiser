@@ -152,12 +152,11 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
       except:
         echo pretty(%* batchFirst)
         raise getCurrentException()
-  yield batchFirst
   for i in 1..round(reviewsTotal.int / 100).toInt() - 1:
     ctx.cursor = cursorPrevious
     let
       fresh = if i == 1: true else: false
-      batch = retrieveReviewBatch(ctx, fresh)
+      batch = ctx.retrieveReviewBatch(fresh)
     count.inc
     yield batch
     cursorPrevious = batch.cursor
