@@ -100,6 +100,8 @@ func genRequestUrl(query: SteamReviewQuery, fresh = false#[ Set to `true` on fir
     query: queries
   )
 
+func extractReviews(batch: SteamReviewsRes): seq[SteamReviewItemRes] = batch.reviews.get(@[])
+
 proc writeBatchSection(batch: SteamReviewsRes) =
   log.writeLine(pretty(%* batch))
   log.writeLine("---")
@@ -136,7 +138,7 @@ proc retrieveReviewBatch(ctx: SteamContext, fresh = false#[ Set to `true` on fir
     echo jResp{"query_summary"}.pretty
     raise getCurrentException()
 
-proc retrieveReviewsAll(ctx: SteamContext): seq[SteamReviewsRes] =
+iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
   var
     count: int = 0
     cursorPrevious = "*"
@@ -150,21 +152,22 @@ proc retrieveReviewsAll(ctx: SteamContext): seq[SteamReviewsRes] =
       except:
         echo pretty(%* batchFirst)
         raise getCurrentException()
-  batchFirst.writeBatchSection()
+  yield batchFirst
   for i in 1..round(reviewsTotal.int / 100).toInt() - 1:
     ctx.cursor = cursorPrevious
     let
       fresh = if i == 1: true else: false
       batch = retrieveReviewBatch(ctx, fresh)
     count.inc
-    batch.writeBatchSection()
+    yield batch
     cursorPrevious = batch.cursor
     sleep 10_000
 
 
 when isMainModule:
-  echo pretty(%* retrieveReviewsAll(
-    ctx = SteamContext(
-      appid: "730"
-    )
-  ))
+  let ctx = SteamContext(
+    appid: "730"
+  )
+  for review in ctx.retrieveReviewsAll:
+    echo pretty(%* review.extractReviews()[0])
+    sleep 90_000
