@@ -20,3 +20,5 @@ htmldocs/
 # Binaries and Temp Files
 /steamreviewessentialiser
 /*.log
+/database
+/src/steamreviewessentialiser/database

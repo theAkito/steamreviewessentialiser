@@ -13,7 +13,8 @@ skipExt       = @["nim"]
 
 # Dependencies
 
-requires "nim >= 1.6.4"
+requires "nim    >= 1.6.4"
+requires "nimdbx >= 0.4.1"
 
 
 # Tasks
