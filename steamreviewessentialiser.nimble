@@ -33,6 +33,7 @@ task configure, "Configure project. Run whenever you continue contributing to th
 task fbuild, "Build project.":
   exec """nim c \
             --define:danger \
+            --experimental:strictNotNil \
             --opt:speed \
             --out:steamreviewessentialiser \
             src/steamreviewessentialiser
@@ -41,6 +42,7 @@ task dbuild, "Debug Build project.":
   exec """nim c \
             --define:debug:true \
             --debuginfo:on \
+            --experimental:strictNotNil \
             --out:steamreviewessentialiser \
             src/steamreviewessentialiser
        """
