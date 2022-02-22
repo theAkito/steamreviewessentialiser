@@ -1,9 +1,11 @@
 import
   steamreviewessentialiser/[
+    meta,
     apiutils,
     database
   ],
   std/[
+    logging,
     strutils,
     strformat,
     options,
@@ -74,7 +76,9 @@ type
     cursor        * : string
     reviews       * : Option[seq[SteamReviewItemRes]]
 
-func genRequestUrl(query: SteamReviewQuery, fresh = false#[ Set to `true` on first request!]#): Url =
+let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "master" & logMsgSuffix)
+
+func genRequestUrl(query: SteamReviewQuery, fresh = false #[ Set to `true` on first request!]#): Url =
   ## Do not encode `query.cursor` manually! cURL encodes already!
   let
     queries = if fresh: @[
@@ -101,7 +105,7 @@ func genRequestUrl(query: SteamReviewQuery, fresh = false#[ Set to `true` on fir
 
 func extractReviews(batch: SteamReviewsRes): seq[SteamReviewItemRes] = batch.reviews.get(@[])
 
-proc genRequest(ctx: SteamContext, fresh = false#[ Set to `true` on first request!]#): Request =
+proc genRequest(ctx: SteamContext, fresh = false #[ Set to `true` on first request!]#): Request =
   let
     query = SteamReviewQuery(
       appid: ctx.appId,
@@ -119,7 +123,7 @@ proc genRequest(ctx: SteamContext, fresh = false#[ Set to `true` on first reques
     headers: @[headerJson]
   )
 
-proc retrieveReviewBatch(ctx: SteamContext, fresh = false#[ Set to `true` on first request!]#): SteamReviewsRes =
+proc retrieveReviewBatch(ctx: SteamContext, fresh = false #[ Set to `true` on first request!]#): SteamReviewsRes =
   let
     req = genRequest(ctx, fresh)
     resp = req.fetch()
