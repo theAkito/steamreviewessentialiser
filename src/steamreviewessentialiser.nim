@@ -108,6 +108,7 @@ func extractReviews(batch: SteamReviewsRes): seq[SteamReviewItemRes] = batch.rev
 proc genRequest(ctx: SteamContext, fresh = false #[ Set to `true` on first request!]#): Request =
   let
     query = SteamReviewQuery(
+      #TODO: Make these configurable through app's configuration JSON file.
       appid: ctx.appId,
       filter: "updated",
       language: "all",
@@ -135,7 +136,7 @@ proc retrieveReviewBatch(ctx: SteamContext, fresh = false #[ Set to `true` on fi
   try:
     jResp.to(SteamReviewsRes)
   except:
-    echo jResp{"query_summary"}.pretty
+    logger.log(lvlError, "Failed to parse Steam Review batch:\n" & jResp{"query_summary"}.pretty)
     raise getCurrentException()
 
 iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
@@ -150,7 +151,7 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
     reviewsTotal = try:
         batchFirst.query_summary.get().total_reviews.get()
       except:
-        echo pretty(%* batchFirst)
+        logger.log(lvlError, "Failed to retrieve total amount of Steam Reviews:\n" & pretty(%* batchFirst))
         raise getCurrentException()
   for i in 1..round(reviewsTotal.int / 100).toInt() - 1:
     ctx.cursor = cursorPrevious
@@ -172,7 +173,7 @@ proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction) =
         jReview = %* review
         jsReview = $ jReview
       if not ct.save(review.recommendationid, jsReview):
-        echo "Failed to save review:\n" & jReview.pretty
+        logger.log(lvlError, "Failed to save Steam Review to Database:\n" & jReview.pretty)
 
 proc saveReviewsAll(ctx: SteamContext) =
   let
