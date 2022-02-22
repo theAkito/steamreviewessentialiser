@@ -81,21 +81,26 @@ let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "ma
 func genRequestUrl(query: SteamReviewQuery, fresh = false #[ Set to `true` on first request!]#): Url =
   ## Do not encode `query.cursor` manually! cURL encodes already!
   let
-    queries = if fresh: @[
-      ("json", "1"),
-      ("appid", query.appid),
-      ("filter", query.filter),
-      ("language", query.language),
-      # ("day_range", query.day_range.get("")),
-      ("cursor", query.cursor),
-      ("review_type", query.review_type),
-      ("purchase_type", query.purchase_type),
-      ("num_per_page", query.num_per_page)
-    ] else: @[
+    queryFilter = query.filter
+    defaultQueries = @[
       ("json", "1"),
       ("appid", query.appid),
       ("cursor", query.cursor)
     ]
+    queryDayRangePartial = query.day_range.get("")
+    optionalQueries = try:
+      if queryFilter == "all" and not queryDayRangePartial.isEmptyOrWhitespace:
+        @[("day_range", queryDayRangePartial)] else: @[]
+    except: @[]
+    queries = if fresh:
+      defaultQueries &
+      optionalQueries & @[
+        ("filter", queryFilter),
+        ("language", query.language),
+        ("review_type", query.review_type),
+        ("purchase_type", query.purchase_type),
+        ("num_per_page", query.num_per_page)
+      ] else: defaultQueries
   Url(
     scheme: "https",
     hostname: "store.steampowered.com",
@@ -128,11 +133,9 @@ proc retrieveReviewBatch(ctx: SteamContext, fresh = false #[ Set to `true` on fi
   let
     req = genRequest(ctx, fresh)
     resp = req.fetch()
-    respCode = resp.code
     jResp =
       try: resp.body.parseJson()
       except: raise SteamDefect.newException(exceptMsgMsgPostErrorParse)
-    respBody = jResp.pretty
   try:
     jResp.to(SteamReviewsRes)
   except:
@@ -156,7 +159,7 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
   for i in 1..round(reviewsTotal.int / 100).toInt() - 1:
     ctx.cursor = cursorPrevious
     let
-      fresh = if i == 1: true else: false
+      fresh = i == 1
       batch = ctx.retrieveReviewBatch(fresh)
     count.inc
     yield batch
