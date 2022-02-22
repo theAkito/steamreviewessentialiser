@@ -1,6 +1,7 @@
 import
   steamreviewessentialiser/[
-    apiutils
+    apiutils,
+    database
   ],
   std/[
     strutils,
@@ -11,7 +12,8 @@ import
     os
   ],
   pkg/[
-    puppy
+    puppy,
+    nimdbx
   ]
 
 type
@@ -162,11 +164,29 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
     cursorPrevious = batch.cursor
     sleep 10_000
 
+proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction) =
+  ##[
+    Requires an open CollectionTransaction.
+  ]##
+  for batch in ctx.retrieveReviewsAll:
+    for review in batch.extractReviews():
+      let
+        jReview = %* review
+        jsReview = $ jReview
+      if not ct.save(review.recommendationid, jsReview):
+        echo "Failed to save review:\n" & jReview.pretty
+
+proc saveReviewsAll(ctx: SteamContext) =
+  let
+    clt = getRefClt(ctx.appid)
+    ct = clt.begin
+  ctx.saveReviewsAllBase(ct)
+  database.commit(ct)
 
 when isMainModule:
+  initDb()
   let ctx = SteamContext(
     appid: "730"
   )
-  for review in ctx.retrieveReviewsAll:
-    echo pretty(%* review.extractReviews()[0])
-    sleep 90_000
+  ctx.saveReviewsAll()
+  closeDb()

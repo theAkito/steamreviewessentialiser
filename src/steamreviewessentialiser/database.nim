@@ -12,13 +12,14 @@ import
 let
   loc = "database"
   flags = {
-    NoSubdir,
+    # NoSubdir,
     Exclusive,
     SafeNoSync
   }
   collFlags = { CreateCollection }
+  putFlags = { NoDupData }
   collKeyType = StringKeys
-  collValType = StringValues
+  collValType = BlobValues
 
 var db: Database
 
@@ -28,7 +29,8 @@ proc getRefClt*(name: string): Collection not nil = db.openCollection(name, coll
 
 # Write
 proc begin*(clt: Collection not nil): CollectionTransaction = clt.beginTransaction()
-proc save*(ct: CollectionTransaction, key, val: string) = ct.put(key, val)
+proc save*(ct: CollectionTransaction, key, val: string): bool =
+  try: ct.put(key, val, putFlags) except: false
 proc commit*(ct: CollectionTransaction) = ct.commit
 proc abort*(ct: CollectionTransaction) = ct.abort
 # Read
