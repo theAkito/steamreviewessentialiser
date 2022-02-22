@@ -74,9 +74,6 @@ type
     cursor        * : string
     reviews       * : Option[seq[SteamReviewItemRes]]
 
-let
-  log = "reviews_csgo.log".open(fmWrite)
-
 func genRequestUrl(query: SteamReviewQuery, fresh = false#[ Set to `true` on first request!]#): Url =
   ## Do not encode `query.cursor` manually! cURL encodes already!
   let
@@ -103,10 +100,6 @@ func genRequestUrl(query: SteamReviewQuery, fresh = false#[ Set to `true` on fir
   )
 
 func extractReviews(batch: SteamReviewsRes): seq[SteamReviewItemRes] = batch.reviews.get(@[])
-
-proc writeBatchSection(batch: SteamReviewsRes) =
-  log.writeLine(pretty(%* batch))
-  log.writeLine("---")
 
 proc genRequest(ctx: SteamContext, fresh = false#[ Set to `true` on first request!]#): Request =
   let
