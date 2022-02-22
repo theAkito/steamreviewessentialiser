@@ -122,7 +122,8 @@ proc genRequest(ctx: SteamContext, fresh = false#[ Set to `true` on first reques
     )
   Request(
     url: genRequestUrl(query, fresh),
-    verb: "get"
+    verb: "get",
+    headers: @[headerJson]
   )
 
 proc retrieveReviewBatch(ctx: SteamContext, fresh = false#[ Set to `true` on first request!]#): SteamReviewsRes =
