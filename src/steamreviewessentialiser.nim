@@ -1,9 +1,11 @@
 import
   steamreviewessentialiser/[
     meta,
-    model,
     apiutils,
     database
+  ],
+  steamreviewessentialiser/model/[
+    steam
   ],
   std/[
     logging,
