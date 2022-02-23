@@ -1,6 +1,7 @@
 import
   steamreviewessentialiser/[
     meta,
+    model,
     apiutils,
     database
   ],
@@ -18,68 +19,11 @@ import
     nimdbx
   ]
 
-type
-  SteamDefect * = object of Defect
-
-  SteamContext * = ref object
-    appId         * : string
-    cursor        * : string
-
-  SteamReviewQuery * = ref object
-    appid         * : string
-    filter        * : string
-    language      * : string
-    day_range     * : Option[string]
-    cursor        * : string
-    review_type   * : string
-    purchase_type * : string
-    num_per_page  * : string
-
-  SteamQuerySummaryRes * = ref object
-    num_reviews       * : Option[int]
-    review_score      * : Option[int]
-    review_score_desc * : Option[string]
-    total_positive    * : Option[int64]
-    total_negative    * : Option[int64]
-    total_reviews     * : Option[int64]
-
-  SteamReviewAutherRes * = ref object
-    steamid                 * : string
-    num_games_owned         * : int64
-    num_reviews             * : int64
-    playtime_forever        * : int64
-    playtime_last_two_weeks * : int64
-    playtime_at_review      * : int64
-    last_played             * : int64
-
-  SteamReviewItemRes * = ref object
-    recommendationid            * : string
-    author                      * : SteamReviewAutherRes
-    language                    * : string
-    review                      * : string
-    timestamp_created           * : int64
-    timestamp_updated           * : int64
-    voted_up                    * : bool
-    votes_up                    * : int64
-    votes_funny                 * : int64
-    weighted_vote_score         * : JsonNode # JString or JInt
-    comment_count               * : int64
-    steam_purchase              * : bool
-    received_for_free           * : bool
-    written_during_early_access * : bool
-    developer_response          * : Option[string]
-    timestamp_dev_responded     * : Option[string]
-
-  SteamReviewsRes * = ref object
-    success       * : int
-    query_summary * : Option[SteamQuerySummaryRes]
-    cursor        * : string
-    reviews       * : Option[seq[SteamReviewItemRes]]
-
 let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "master" & logMsgSuffix)
 
 func genRequestUrl(query: SteamReviewQuery, fresh = false #[ Set to `true` on first request!]#): Url =
   ## Do not encode `query.cursor` manually! cURL encodes already!
+  ## API Reference: https://partner.steamgames.com/doc/store/getreviews
   let
     queryFilter = query.filter
     defaultQueries = @[
@@ -113,6 +57,7 @@ func extractReviews(batch: SteamReviewsRes): seq[SteamReviewItemRes] = batch.rev
 proc genRequest(ctx: SteamContext, fresh = false #[ Set to `true` on first request!]#): Request =
   let
     query = SteamReviewQuery(
+      ## API Reference: https://partner.steamgames.com/doc/store/getreviews
       #TODO: Make these configurable through app's configuration JSON file.
       appid: ctx.appId,
       filter: "updated",
@@ -139,7 +84,7 @@ proc retrieveReviewBatch(ctx: SteamContext, fresh = false #[ Set to `true` on fi
   try:
     jResp.to(SteamReviewsRes)
   except:
-    logger.log(lvlError, "Failed to parse Steam Review batch:\n" & jResp{"query_summary"}.pretty)
+    logger.log(lvlFatal, "Failed to parse Steam Review batch:\n" & jResp{"query_summary"}.pretty)
     raise getCurrentException()
 
 iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
@@ -154,7 +99,7 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
     reviewsTotal = try:
         batchFirst.query_summary.get().total_reviews.get()
       except:
-        logger.log(lvlError, "Failed to retrieve total amount of Steam Reviews:\n" & pretty(%* batchFirst))
+        logger.log(lvlFatal, "Failed to retrieve total amount of Steam Reviews:\n" & pretty(%* batchFirst))
         raise getCurrentException()
   for i in 1..round(reviewsTotal.int / 100).toInt() - 1:
     ctx.cursor = cursorPrevious
