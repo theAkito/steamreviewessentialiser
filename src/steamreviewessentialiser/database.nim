@@ -1,8 +1,10 @@
 import
   meta,
   apiutils,
+  configurator,
   model/[
-    database
+    database,
+    helper
   ],
   std/[
     sets,
@@ -50,22 +52,46 @@ var db: Database
 func isEntryMetadata(entryName: string): bool = entryNamesMetadata.contains(entryName)
 func isEntryReview(entryName: string): bool = result = try: entryName.parseInt() != 0 except: false
 
+proc makeConfig(
+  maxItems: int,
+  reviewType: ReviewType,
+  purchaseType: PurchaseType,
+  language: Language
+): DatabaseConfig =
+  DatabaseConfig(
+    maxItems: maxItems,
+    reviewType: reviewType,
+    purchaseType: purchaseType,
+    language: language
+  )
+
+proc makeConfigForDB*(
+  maxItems: int = dbConfig.maxItems,
+  reviewType: ReviewType = dbConfig.reviewType,
+  purchaseType: PurchaseType = dbConfig.purchaseType,
+  language: Language = dbConfig.language
+): string =
+  $ %* makeConfig(
+    maxItems,
+    reviewType,
+    purchaseType,
+    language
+  )
+
 proc makeStatus(
   complete: bool,
   recommendationIDs: seq[string],
   tagCloudAvailable: bool = false,
   cursorLatest: string = "*"
 ): DatabaseStatus =
-  let
-    status = DatabaseStatus(
-      complete: complete,
-      tagCloudAvailable: tagCloudAvailable,
-      cursorLatest: cursorLatest,
-      recommendationIDs: recommendationIDs,
-      timestampUpdate: initTimestamp(),
-      timestampComplete: if complete: initTimestamp() else: defaultTimestamp,
-    )
-  status
+  DatabaseStatus(
+    complete: complete,
+    tagCloudAvailable: tagCloudAvailable,
+    cursorLatest: cursorLatest,
+    recommendationIDs: recommendationIDs,
+    timestampUpdate: initTimestamp(),
+    timestampComplete: if complete: initTimestamp() else: defaultTimestamp,
+  )
 
 proc makeStatusForDB*(
   complete: bool,
@@ -88,6 +114,7 @@ proc getRefClt*(name: string): Collection not nil = db.openCollection(name, coll
 proc begin*(clt: Collection not nil): CollectionTransaction = clt.beginTransaction()
 proc save*(ct: CollectionTransaction, key, val: string): bool =
   try: ct.put(key, val, putFlags) except: false
+proc saveConfig*(ct: CollectionTransaction, val: string): bool = ct.save(entryNameConfig, val)
 proc saveStatus*(ct: CollectionTransaction, val: string): bool = ct.save(entryNameStatus, val)
 proc commit*(ct: CollectionTransaction) = nimdbx.commit(ct)
 proc abort*(ct: CollectionTransaction) = nimdbx.abort(ct)
