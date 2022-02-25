@@ -22,9 +22,9 @@ type
     num_reviews       * : Option[int]
     review_score      * : Option[int]
     review_score_desc * : Option[string]
-    total_positive    * : Option[int64]
-    total_negative    * : Option[int64]
-    total_reviews     * : Option[int64]
+    total_positive    * : Option[int]
+    total_negative    * : Option[int]
+    total_reviews     * : Option[int]
 
   SteamReviewAutherRes * = ref object
     steamid                 * : string

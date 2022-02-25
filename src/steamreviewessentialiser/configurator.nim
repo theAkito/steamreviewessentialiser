@@ -9,7 +9,7 @@ import
 type
   MasterConfig = object
     version                   *: string
-    maxItems                  *: int64
+    maxItems                  *: int
     intervalAPI               *: int
     debug                     *: bool
 

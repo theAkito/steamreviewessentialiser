@@ -68,6 +68,7 @@ iterator loadAllReviews(cltName: string): SteamReviewItemRes =
   let
     clt = getRefClt(cltName)
     snap = clt.beginShow()
+  defer: snap.finishShow()
   var cursor = snap.makeCursor()
   for key, val in cursor.pairs:
     if not key.isEntryReview(): continue
