@@ -1,13 +1,21 @@
 import
+  meta,
+  apiutils,
   std/[
     sets,
-    json
+    json,
+    strutils,
+    logging
   ],
   pkg/[
     nimdbx
   ]
 
+from model/steam import SteamReviewItemRes
+
 {.experimental: "notnil".}
+
+type DatabaseDefect = object of Defect
 
 const
   entryNameConfig    = "config"
@@ -20,7 +28,8 @@ const
   ]
 
 let
-  loc = "database"
+  logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "database" & logMsgSuffix)
+  loc = "database" #TODO: Make configurable.
   flags = {
     # NoSubdir,
     Exclusive,
@@ -34,6 +43,7 @@ let
 var db: Database
 
 func isEntryMetadata(entryName: string): bool = entryNamesMetadata.contains(entryName)
+func isEntryReview(entryName: string): bool = result = try: entryName.parseInt() != 0 except: false
 
 # General
 proc initDb*() = db = loc.openDatabase(flags = flags)
@@ -52,6 +62,20 @@ proc finishShow*(snap: CollectionSnapshot) = snap.finish
 
 # General
 proc closeDb*() = db.close
+
+# Utils
+iterator loadAllReviews(cltName: string): SteamReviewItemRes =
+  let
+    clt = getRefClt(cltName)
+    snap = clt.beginShow()
+  var cursor = snap.makeCursor()
+  for key, val in cursor.pairs:
+    if not key.isEntryReview(): continue
+    try:
+      yield val.parseJson().to(SteamReviewItemRes)
+    except:
+      logger.log(lvlDebug, exceptMsgMsgPostErrorParse)
+      continue
 
 when isMainModule:
   import os
