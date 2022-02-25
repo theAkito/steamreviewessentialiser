@@ -6,6 +6,7 @@ import
     configurator
   ],
   steamreviewessentialiser/model/[
+    helper,
     steam
   ],
   std/[
@@ -150,6 +151,22 @@ proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, st
     return
   result[0] = true
 
+proc saveDbConfig(
+  ct: CollectionTransaction,
+  maxItems: int = dbConfig.maxItems,
+  reviewType: ReviewType = dbConfig.reviewType,
+  purchaseType: PurchaseType = dbConfig.purchaseType,
+  language: Language = dbConfig.language
+): bool {.discardable.} =
+  let
+    config = makeConfigForDB(
+      maxItems,
+      reviewType,
+      purchaseType,
+      language
+    )
+  ct.saveConfig(config)
+
 proc saveDbStatus(
   ct: CollectionTransaction,
   complete: bool,
@@ -171,6 +188,7 @@ proc saveReviewsAll(ctx: SteamContext) =
     clt = getRefClt(ctx.appid)
     ct = clt.begin
     (complete, cursor, recommendationIDs) = ctx.saveReviewsAllBase(ct)
+  ct.saveDbConfig()
   ct.saveDbStatus(
     complete,
     cursor,
