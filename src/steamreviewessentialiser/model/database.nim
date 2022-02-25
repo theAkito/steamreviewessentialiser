@@ -8,7 +8,7 @@ from tag import TagCloud
 
 type
   DatabaseConfig * = ref object
-    maxItems            * : int64        ## How many reviews should be allowed to be saved for this particular game.
+    maxItems            * : int          ## How many reviews should be allowed to be saved for this particular game.
     reviewType          * : ReviewType   ## Which review type is allowed to be saved. Default: "all" (positive & negative)
     purchaseType        * : PurchaseType ## Which purchase type is allowed to be saved. Default: "all" (Non-Steam & Steam)
     language            * : Language     ## Which human language is allowed to be saved. Default: "english"

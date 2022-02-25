@@ -1,6 +1,9 @@
 import
   meta,
   apiutils,
+  model/[
+    database
+  ],
   std/[
     sets,
     json,
@@ -8,7 +11,8 @@ import
     logging
   ],
   pkg/[
-    nimdbx
+    nimdbx,
+    timestamp
   ]
 
 from model/steam import SteamReviewItemRes
@@ -28,6 +32,7 @@ const
   ]
 
 let
+  defaultTimestamp = initTimestamp(0)
   logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "database" & logMsgSuffix)
   loc = "database" #TODO: Make configurable.
   flags = {
@@ -44,6 +49,36 @@ var db: Database
 
 func isEntryMetadata(entryName: string): bool = entryNamesMetadata.contains(entryName)
 func isEntryReview(entryName: string): bool = result = try: entryName.parseInt() != 0 except: false
+
+proc makeStatus(
+  complete: bool,
+  recommendationIDs: seq[string],
+  tagCloudAvailable: bool = false,
+  cursorLatest: string = "*"
+): DatabaseStatus =
+  let
+    status = DatabaseStatus(
+      complete: complete,
+      tagCloudAvailable: tagCloudAvailable,
+      cursorLatest: cursorLatest,
+      recommendationIDs: recommendationIDs,
+      timestampUpdate: initTimestamp(),
+      timestampComplete: if complete: initTimestamp() else: defaultTimestamp,
+    )
+  status
+
+proc makeStatusForDB*(
+  complete: bool,
+  recommendationIDs: seq[string],
+  tagCloudAvailable: bool = false,
+  cursorLatest: string = "*"
+): string =
+  $ %* makeStatus(
+    complete,
+    recommendationIDs,
+    tagCloudAvailable,
+    cursorLatest
+  )
 
 # General
 proc initDb*() = db = loc.openDatabase(flags = flags)
@@ -64,7 +99,7 @@ proc finishShow*(snap: CollectionSnapshot) = snap.finish
 proc closeDb*() = db.close
 
 # Utils
-iterator loadAllReviews(cltName: string): SteamReviewItemRes =
+iterator loadAllReviews*(cltName: string): SteamReviewItemRes =
   let
     clt = getRefClt(cltName)
     snap = clt.beginShow()
