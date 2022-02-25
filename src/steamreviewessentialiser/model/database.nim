@@ -4,6 +4,7 @@
 
 import helper
 from timestamp import Timestamp
+from tag import TagCloud
 
 type
   DatabaseConfig * = ref object
@@ -14,11 +15,13 @@ type
 
   DatabaseStatus * = ref object
     complete            * : bool         ## Whether the review gathering ever completely fetched and saved all reviews for this particular game.
-    tagCloudAvailable   * : bool         ## Whether a the generation of the Tag Cloud was finished and is available.
+    tagCloudAvailable   * : bool         ## Whether the generation of the Tag Cloud was finished and is available.
     cursorLatest        * : string       ## Which cursor position to continue gathering from, if gathering wasn't finished, yet.
     recommendationIDs   * : seq[string]  ## A list of recommendationids, contained in this collection. Use, to quickly know which reviews are already known/saved and which are newly composed, i.e. gathered from the API, but not yet contained in this sequence. Length of this sequence must correspond to amount of reviews saved in this collection.
     timestampUpdate     * : Timestamp    ## When was the last time the collection was refreshed with updated versions of reviews.
     timestampComplete   * : Timestamp    ## When was the last time the collection finished gathering all reviews for this particular game.
+
+  DatabaseTagCloud * = ref TagCloud
 
 
 when isMainModule:
