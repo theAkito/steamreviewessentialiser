@@ -88,6 +88,7 @@ proc getRefClt*(name: string): Collection not nil = db.openCollection(name, coll
 proc begin*(clt: Collection not nil): CollectionTransaction = clt.beginTransaction()
 proc save*(ct: CollectionTransaction, key, val: string): bool =
   try: ct.put(key, val, putFlags) except: false
+proc saveStatus*(ct: CollectionTransaction, val: string): bool = ct.save(entryNameStatus, val)
 proc commit*(ct: CollectionTransaction) = nimdbx.commit(ct)
 proc abort*(ct: CollectionTransaction) = nimdbx.abort(ct)
 # Read
