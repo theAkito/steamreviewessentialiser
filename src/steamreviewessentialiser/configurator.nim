@@ -4,7 +4,11 @@ import
   base64,
   os,
   logging,
-  strutils
+  strutils,
+  model/[
+    database,
+    helper
+  ]
 
 type
   MasterConfig = object
@@ -21,4 +25,10 @@ let
     intervalAPI: 10_000,
     maxItems: 500,
     debug: meta.debug
+  )
+  dbConfig* = DatabaseConfig(
+    maxItems: 500,
+    reviewType: ReviewType.all,
+    purchaseType: PurchaseType.all,
+    language: Language.english
   )
