@@ -2,7 +2,8 @@ import
   steamreviewessentialiser/[
     meta,
     apiutils,
-    database
+    database,
+    configurator
   ],
   steamreviewessentialiser/model/[
     steam
@@ -22,6 +23,15 @@ import
   ]
 
 let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "master" & logMsgSuffix)
+
+proc genBatchIterLimit(reviewsTotal: int or int64, batchSize: int): int =
+  let
+    reviewsTotalBatches = round(reviewsTotal.int / batchSize).toInt() - 1
+    maxBatches = round(config.maxItems.int / batchSize).toInt()
+  if reviewsTotalBatches < maxBatches:
+    reviewsTotalBatches
+  else:
+    maxBatches
 
 func genRequestUrl(query: SteamReviewQuery, fresh = false #[ Set to `true` on first request!]#): Url =
   ## Do not encode `query.cursor` manually! cURL encodes already!
@@ -103,7 +113,7 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
       except:
         logger.log(lvlFatal, "Failed to retrieve total amount of Steam Reviews:\n" & pretty(%* batchFirst))
         raise getCurrentException()
-  for i in 1..round(reviewsTotal.int / 100).toInt() - 1:
+  for i in 1..genBatchIterLimit(reviewsTotal, 100):
     ctx.cursor = cursorPrevious
     let
       fresh = i == 1
@@ -111,7 +121,7 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
     count.inc
     yield batch
     cursorPrevious = batch.cursor
-    sleep 10_000
+    sleep config.intervalAPI
 
 proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction) =
   ##[
