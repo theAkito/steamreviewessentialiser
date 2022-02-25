@@ -128,23 +128,54 @@ iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
     cursorPrevious = batch.cursor
     sleep config.intervalAPI
 
-proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction) =
+proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, string, seq[string]) {.raises: [Exception #[Due to Lumberjack.]#].} =
   ##[
     Requires an open CollectionTransaction.
   ]##
-  for batch in ctx.retrieveReviewsAll:
-    for review in batch.extractReviews():
-      let
-        jReview = %* review
-        jsReview = $ jReview
-      if not ct.save(review.recommendationid, jsReview):
-        logger.log(lvlError, "Failed to save Steam Review to Database:\n" & jReview.pretty)
+  result = (false, "", @[])
+  try:
+    for batch in ctx.retrieveReviewsAll:
+      result[1] = batch.cursor
+      for review in batch.extractReviews():
+        let
+          id = review.recommendationid
+          jReview = %* review
+          jsReview = $ jReview
+        if ct.save(id, jsReview):
+          result[2].add id
+        else:
+          logger.log(lvlError, "Failed to save Steam Review to Database:\n" & jReview.pretty)
+  except:
+    logger.log(lvlError, "Failed to complete retrieval of requested reviews:\n" & getCurrentExceptionMsg())
+    return
+  result[0] = true
+
+proc saveDbStatus(
+  ct: CollectionTransaction,
+  complete: bool,
+  cursorLatest: string,
+  recommendationIDs: seq[string],
+  tagCloudAvailable: bool = false
+): bool {.discardable.} =
+  let
+    status = makeStatusForDB(
+      complete,
+      recommendationIDs,
+      tagCloudAvailable,
+      cursorLatest
+    )
+  ct.saveStatus(status)
 
 proc saveReviewsAll(ctx: SteamContext) =
   let
     clt = getRefClt(ctx.appid)
     ct = clt.begin
-  ctx.saveReviewsAllBase(ct)
+    (complete, cursor, recommendationIDs) = ctx.saveReviewsAllBase(ct)
+  ct.saveDbStatus(
+    complete,
+    cursor,
+    recommendationIDs
+  )
   database.commit(ct)
 
 when isMainModule:
