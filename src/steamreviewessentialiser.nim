@@ -24,10 +24,15 @@ import
 
 let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "master" & logMsgSuffix)
 
-proc genBatchIterLimit(reviewsTotal: int or int64, batchSize: int): int =
+func genBatchAmountBonus(total, batchSize: int): int =
+  if total mod batchSize == 0: 0 else: 1
+
+proc genBatchAmount(total, batchSize: int): int = floor(total / batchSize).toInt() + genBatchAmountBonus(total, batchSize)
+
+proc genBatchIterLimit(reviewsTotal, batchSize: int): int =
   let
-    reviewsTotalBatches = round(reviewsTotal.int / batchSize).toInt() - 1
-    maxBatches = round(config.maxItems.int / batchSize).toInt()
+    reviewsTotalBatches = genBatchAmount(reviewsTotal, batchSize)
+    maxBatches = genBatchAmount(config.maxItems, batchSize)
   if reviewsTotalBatches < maxBatches:
     reviewsTotalBatches
   else:
