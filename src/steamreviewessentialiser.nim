@@ -16,6 +16,7 @@ import
     options,
     json,
     math,
+    sets,
     os
   ],
   pkg/[
@@ -47,7 +48,8 @@ func genRequestUrl(query: SteamReviewQuery, fresh = false #[ Set to `true` on fi
     defaultQueries = @[
       ("json", "1"),
       ("appid", query.appid),
-      ("cursor", query.cursor)
+      ("cursor", query.cursor),
+      ("num_per_page", query.num_per_page)
     ]
     queryDayRangePartial = query.day_range.get("")
     optionalQueries = try:
@@ -60,8 +62,7 @@ func genRequestUrl(query: SteamReviewQuery, fresh = false #[ Set to `true` on fi
         ("filter", queryFilter),
         ("language", query.language),
         ("review_type", query.review_type),
-        ("purchase_type", query.purchase_type),
-        ("num_per_page", query.num_per_page)
+        ("purchase_type", query.purchase_type)
       ] else: defaultQueries
   Url(
     scheme: "https",
@@ -105,37 +106,46 @@ proc retrieveReviewBatch(ctx: SteamContext, fresh = false #[ Set to `true` on fi
     logger.log(lvlFatal, "Failed to parse Steam Review batch:\n" & jResp{"query_summary"}.pretty)
     raise getCurrentException()
 
-iterator retrieveReviewsAll(ctx: SteamContext): SteamReviewsRes {.inline.} =
+iterator retrieveReviewsAll(ctx: SteamContext, cursorProvided = "*"): SteamReviewsRes {.inline.} =
   var
     count: int = 0
     cursorPrevious = "*"
   ctx.cursor = cursorPrevious
   let
     batchFirst = ctx.retrieveReviewBatch(true)
-  cursorPrevious = batchFirst.cursor
+  #TODO: Does this work if new reviews were added in the meantime? The cursors might've changed.
+  cursorPrevious = if cursorProvided == cursorPrevious: batchFirst.cursor else: cursorProvided
   let
     reviewsTotal = try:
         batchFirst.query_summary.get().total_reviews.get()
       except:
         logger.log(lvlFatal, "Failed to retrieve total amount of Steam Reviews:\n" & pretty(%* batchFirst))
         raise getCurrentException()
-  for i in 1..genBatchIterLimit(reviewsTotal, 100):
+    reviewsPerBatch = try:
+        batchFirst.query_summary.get().num_reviews.get()
+      except:
+        logger.log(lvlFatal, "Failed to retrieve current batch's amount of Steam Reviews:\n" & pretty(%* batchFirst))
+        raise getCurrentException()
+  for i in 1..genBatchIterLimit(reviewsTotal, reviewsPerBatch):
     ctx.cursor = cursorPrevious
     let
       fresh = i == 1
       batch = ctx.retrieveReviewBatch(fresh)
+    try: logger.log(lvlDebug, "Actual number of reviews retrieved in this batch: " & $batch.query_summary.get().num_reviews.get())
+    except: continue
     count.inc
     yield batch
     cursorPrevious = batch.cursor
     sleep config.intervalAPI
 
-proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, string, seq[string]) {.raises: [Exception #[Due to Lumberjack.]#].} =
+proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, string, HashSet[string]) {.raises: [Exception #[Due to Lumberjack.]#].} =
   ##[
     Requires an open CollectionTransaction.
   ]##
-  result = (false, "", @[])
+  result = (false, "", initHashSet[string](config.maxItems))
   try:
-    for batch in ctx.retrieveReviewsAll:
+    for batch in ctx.retrieveReviewsAll(ctx.cursor):
+      logger.log(lvlDebug, "Current batch's cursor: " & batch.cursor)
       result[1] = batch.cursor
       for review in batch.extractReviews():
         let
@@ -143,12 +153,16 @@ proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, st
           jReview = %* review
           jsReview = $ jReview
         if ct.save(id, jsReview):
-          result[2].add id
+          if result[2].contains(id):
+            logger.log(lvlDebug, "Duplicate Review ID detected: " & id)
+          else:
+            result[2].incl id
         else:
           logger.log(lvlError, "Failed to save Steam Review to Database:\n" & jReview.pretty)
   except:
     logger.log(lvlError, "Failed to complete retrieval of requested reviews:\n" & getCurrentExceptionMsg())
     return
+  logger.log(lvlInfo, &"Number of reviews gathered by this request for game with App ID {ct.collection.name}: " & $result[2].len)
   result[0] = true
 
 proc saveDbConfig(
@@ -171,7 +185,7 @@ proc saveDbStatus(
   ct: CollectionTransaction,
   complete: bool,
   cursorLatest: string,
-  recommendationIDs: seq[string],
+  recommendationIDs: HashSet[string],
   tagCloudAvailable: bool = false
 ): bool {.discardable.} =
   let
@@ -186,8 +200,13 @@ proc saveDbStatus(
 proc saveReviewsAll(ctx: SteamContext) =
   let
     clt = getRefClt(ctx.appid)
+    preStatus = clt.loadDatabaseStatus()
+  # Continue from last checkpoint, if previews review gathering was interrupted.
+  if preStatus != nil and not preStatus.complete: ctx.cursor = preStatus.cursorLatest
+  let
     ct = clt.begin
     (complete, cursor, recommendationIDs) = ctx.saveReviewsAllBase(ct)
+  logger.log(lvlDebug, &"recommendationIDs contained in Collection for game with App ID {clt.name}: " & $recommendationIDs)
   ct.saveDbConfig()
   ct.saveDbStatus(
     complete,
