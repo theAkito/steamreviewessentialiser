@@ -7,8 +7,9 @@ import
     helper
   ],
   std/[
-    sets,
     json,
+    sets,
+    sequtils,
     strutils,
     logging
   ],
@@ -80,22 +81,23 @@ proc makeConfigForDB*(
 
 proc makeStatus(
   complete: bool,
-  recommendationIDs: seq[string],
+  recommendationIDs: HashSet[string],
   tagCloudAvailable: bool = false,
   cursorLatest: string = "*"
 ): DatabaseStatus =
+  let timestamp = initTimestamp()
   DatabaseStatus(
     complete: complete,
     tagCloudAvailable: tagCloudAvailable,
     cursorLatest: cursorLatest,
-    recommendationIDs: recommendationIDs,
-    timestampUpdate: initTimestamp(),
-    timestampComplete: if complete: initTimestamp() else: defaultTimestamp,
+    recommendationIDs: recommendationIDs.toSeq,
+    timestampUpdate: timestamp,
+    timestampComplete: if complete: timestamp else: defaultTimestamp,
   )
 
 proc makeStatusForDB*(
   complete: bool,
-  recommendationIDs: seq[string],
+  recommendationIDs: HashSet[string],
   tagCloudAvailable: bool = false,
   cursorLatest: string = "*"
 ): string =
@@ -127,6 +129,16 @@ proc finishShow*(snap: CollectionSnapshot) = snap.finish
 proc closeDb*() = db.close
 
 # Utils
+proc loadDatabaseStatus*(clt: Collection not nil): DatabaseStatus =
+  let snap = clt.beginShow()
+  try:
+    let status = snap.get(entryNameStatus)
+    result = status.parseJson().to(DatabaseStatus)
+  except:
+    result = nil
+  finally:
+    snap.finishShow()
+
 iterator loadAllReviews*(cltName: string): SteamReviewItemRes =
   let
     clt = getRefClt(cltName)
