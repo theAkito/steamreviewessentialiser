@@ -142,6 +142,7 @@ proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, st
   ##[
     Requires an open CollectionTransaction.
   ]##
+  var counterDup: int
   result = (false, "", initHashSet[string](config.maxItems))
   try:
     for batch in ctx.retrieveReviewsAll(ctx.cursor):
@@ -154,6 +155,7 @@ proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, st
           jsReview = $ jReview
         if ct.save(id, jsReview):
           if result[2].contains(id):
+            counterDup.inc
             logger.log(lvlDebug, "Duplicate Review ID detected: " & id)
           else:
             result[2].incl id
@@ -163,6 +165,7 @@ proc saveReviewsAllBase(ctx: SteamContext, ct: CollectionTransaction): (bool, st
     logger.log(lvlError, "Failed to complete retrieval of requested reviews:\n" & getCurrentExceptionMsg())
     return
   logger.log(lvlInfo, &"Number of reviews gathered by this request for game with App ID {ct.collection.name}: " & $result[2].len)
+  logger.log(lvlInfo, &"Number of reviews detected as duplicates, which were skipped, for game with App ID {ct.collection.name}: " & $counterDup)
   result[0] = true
 
 proc saveDbConfig(
