@@ -129,15 +129,18 @@ proc finishShow*(snap: CollectionSnapshot) = snap.finish
 proc closeDb*() = db.close
 
 # Utils
-proc loadDatabaseStatus*(clt: Collection not nil): DatabaseStatus =
+template loadDatabaseModel(clt: untyped, entryName: untyped, typ: typedesc): untyped =
   let snap = clt.beginShow()
   try:
-    let status = snap.get(entryNameStatus)
-    result = status.parseJson().to(DatabaseStatus)
+    let status = snap.get(entryName)
+    result = status.parseJson().to(typ)
   except:
     result = nil
   finally:
     snap.finishShow()
+
+proc loadDatabaseStatus*(clt: Collection not nil): DatabaseStatus =
+  loadDatabaseModel(clt, entryNameStatus, DatabaseStatus)
 
 iterator loadAllReviews*(cltName: string): SteamReviewItemRes =
   let
