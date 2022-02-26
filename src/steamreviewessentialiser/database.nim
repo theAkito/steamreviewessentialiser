@@ -139,6 +139,9 @@ template loadDatabaseModel(clt: untyped, entryName: untyped, typ: typedesc): unt
   finally:
     snap.finishShow()
 
+proc loadDatabaseConfig*(clt: Collection not nil): DatabaseConfig =
+  loadDatabaseModel(clt, entryNameConfig, DatabaseConfig)
+
 proc loadDatabaseStatus*(clt: Collection not nil): DatabaseStatus =
   loadDatabaseModel(clt, entryNameStatus, DatabaseStatus)
 
