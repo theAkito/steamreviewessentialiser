@@ -58,3 +58,13 @@ type
     query_summary * : Option[SteamQuerySummaryRes]
     cursor        * : string
     reviews       * : Option[seq[SteamReviewItemRes]]
+
+  SteamAppRes * = ref object
+    appid * : uint32
+    name  * : string
+
+  SteamAppsRes * = ref object
+    apps * : seq[SteamAppRes]
+
+  SteamAppListRes * = ref object
+    applist * : SteamAppsRes
