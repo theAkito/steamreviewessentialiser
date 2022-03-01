@@ -48,8 +48,7 @@ proc retrieveApps*(): seq[SteamAppRes] =
 when isMainModule:
   import random, sequtils
   randomize()
-  var appSelected: SteamAppRes
   let
     apps = retrieveApps().filterIt(it.name.toLowerAscii.contains("warhammer"))
-  appSelected = apps[apps.high.rand]
+    appSelected = apps[apps.high.rand]
   echo pretty(%* appSelected)
