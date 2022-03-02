@@ -34,7 +34,8 @@ var
 
 proc spell*(word: string): bool = hunspell.spell(word.cstring)
 proc suggest*(word: string): seq[string] = hunspell.suggest(word.cstring).toSeq
-proc stem*(word: string): string = hunspell.stem(hunspell.analyze(word.cstring)).toSeq()[0]
+proc stem*(word: string): string = # Sequence is empty and then excepts, due to index error, when stem cannot be detected.
+  try: hunspell.stem(hunspell.analyze(word.cstring)).toSeq()[0] except: word
 
 proc root*(word: string): string =
   ## Get most likely correct version of word.
