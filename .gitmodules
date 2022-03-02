@@ -1,3 +1,6 @@
 [submodule "tasks"]
 	path = tasks
 	url = https://github.com/theAkito/nim-tools.git
+[submodule "src/steamreviewessentialiser/externlib/hunspell"]
+	path = src/steamreviewessentialiser/externlib/hunspell
+	url = https://github.com/hunspell/hunspell.git
