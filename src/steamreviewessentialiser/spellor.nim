@@ -30,6 +30,8 @@ proc addDic(hunspell: ptr HunspellObj, dpath: cstring): cint {.header: header, i
 proc spell(hunspell: ptr HunspellObj, word: cstring): bool {.header: header, importcpp: "#.spell(@)".}
 proc spell(hunspell: ptr HunspellObj, word: cstring, info: cint, root: cstring): bool {.header: header, importcpp: "#.spell(@)".}
 proc suggest(hunspell: ptr HunspellObj, word: cstring): CppVector[CppString] {.header: header, importcpp: "#.suggest(@)".}
+proc analyze(hunspell: ptr HunspellObj, word: cstring): CppVector[CppString] {.header: header, importcpp: "#.analyze(@)".}
+proc stem(hunspell: ptr HunspellObj, morph: CppVector[CppString]): CppVector[CppString] {.header: header, importcpp: "#.stem(@)".}
 # C++ Support Utilities
 func high(v: CppVector): uint = v.len - 1
 func toSeq(v: CppVector[CppString]): seq[string] =
@@ -44,6 +46,7 @@ var
 
 proc spell*(word: string): bool = hunspell.spell(word.cstring)
 proc suggest*(word: string): seq[string] = hunspell.suggest(word.cstring).toSeq
+proc stem*(word: string): string = hunspell.stem(hunspell.analyze(word.cstring)).toSeq()[0]
 
 when isMainModule:
   echo "Spelling of \"Recommendation\" is correct: " & $hunspell.spell("Recommendation".cstring)
@@ -52,3 +55,8 @@ when isMainModule:
   echo "Suggestions for \"Recommendation\":\n" & pretty(% hunspell.suggest("Recommendation".cstring).toSeq)
   echo()
   echo "Suggestions for \"hell\":\n" & pretty(% hunspell.suggest("hell".cstring).toSeq)
+  echo()
+  let morph1 = hunspell.analyze("Mixing".cstring)
+  echo "Analysis for \"Mixing\":\n" & pretty(% morph1.toSeq)
+  echo()
+  echo "Stem from morphological analysis for \"Mixing\":\n" & pretty(% hunspell.stem(morph1).toSeq)
