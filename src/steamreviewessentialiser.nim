@@ -3,7 +3,8 @@ import
     meta,
     apiutils,
     database,
-    configurator
+    configurator,
+    requestprocessor
   ],
   steamreviewessentialiser/model/[
     helper,
@@ -220,8 +221,9 @@ proc saveReviewsAll(ctx: SteamContext) =
 
 when isMainModule:
   initDb()
-  let ctx = SteamContext(
-    appid: "730"
-  )
-  ctx.saveReviewsAll()
+  # let ctx = SteamContext(
+  #   appid: "730"
+  # )
+  # ctx.saveReviewsAll()
+  listen()
   closeDb()
