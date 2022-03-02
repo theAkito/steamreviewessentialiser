@@ -43,8 +43,7 @@ proc extractMostUsedRoots*(text: openArray[string], amount: int = 15): OrderedTa
   logger.log(lvlDebug, "[extractMostUsedRoots] Result: " & pretty(%* result))
 
 when isMainModule:
-  # import tables, sets, sequtils
-  const testReviewContent = ["mostused aint what for lobby", "lobby why mostused", "mostused aint what"]
+  const testReviewContent = ["mostused aint what for lobby dsfsdffsdfsdfds", "lobby why mostused", "mostused aint what"]
   var
     words: seq[string]
     tagsPop: OrderedSet[string]
@@ -60,4 +59,5 @@ when isMainModule:
     tagsPop.incl pair[0]
     tagToPop[pair[0]] = % pair[1]
   echo "Words ordered by popularity: " & pretty(%* tagsPop.toSeq) & "\n"
-  echo "Whole CountTable, where the most used word is on top mapped to how often it was used: " & tagToPop.pretty
+  echo "Whole CountTable, where the most used word is on top mapped to how often it was used: " & tagToPop.pretty & "\n"
+  discard testReviewContent.extractMostUsedRoots
