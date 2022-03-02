@@ -34,18 +34,23 @@ task configure, "Configure project. Run whenever you continue contributing to th
   exec "nimble install --accept --depsOnly"
   exec "git status"
 task fbuild, "Build project.":
-  exec """nim c \
+  exec """nim cpp \
             --define:danger \
             --experimental:strictNotNil \
+            --passC="-Isrc/steamreviewessentialiser/externlib/hunspell/src/hunspell" \
+            --passL="-lhunspell-1.7" \
             --opt:speed \
             --out:steamreviewessentialiser \
             src/steamreviewessentialiser
        """
 task dbuild, "Debug Build project.":
-  exec """nim c \
+  exec """nim cpp \
             --define:debug:true \
             --debuginfo:on \
             --experimental:strictNotNil \
+            --cincludes:src/steamreviewessentialiser/externlib/hunspell/src/tools \
+            --passC="-Isrc/steamreviewessentialiser/externlib/hunspell/src/hunspell" \
+            --passL="-lhunspell-1.7" \
             --out:steamreviewessentialiser \
             src/steamreviewessentialiser
        """
