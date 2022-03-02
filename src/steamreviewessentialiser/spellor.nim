@@ -42,6 +42,9 @@ const
 var
   hunspell: ptr HunspellObj = newHunspell(pathAffEN_US, pathDictEN_US) ## Hunspell instance.
 
+proc spell*(word: string): bool = hunspell.spell(word.cstring)
+proc suggest*(word: string): seq[string] = hunspell.suggest(word.cstring).toSeq
+
 when isMainModule:
   echo "Spelling of \"Recommendation\" is correct: " & $hunspell.spell("Recommendation".cstring)
   echo "Spelling of \"Recommnedation\" is correct: " & $hunspell.spell("Recommnedation".cstring)
