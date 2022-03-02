@@ -5,20 +5,7 @@
 
 # https://forum.nim-lang.org/t/6833#42762
 
-import
-  meta,
-  model/[
-    tag
-  ],
-  std/[
-    os,
-    json,
-    logging,
-    strutils
-  ],
-  pkg/[
-    cppstl
-  ]
+import cppstl
 
 const header = "externlib/hunspell/src/hunspell/hunspell.hxx"
 
@@ -57,6 +44,7 @@ proc root*(word: string): string =
   correct.stem
 
 when isMainModule:
+  import json
   echo "Spelling of \"Recommendation\" is correct: " & $hunspell.spell("Recommendation".cstring)
   echo "Spelling of \"Recommnedation\" is correct: " & $hunspell.spell("Recommnedation".cstring)
   echo()
