@@ -1,5 +1,6 @@
 ##[
   Spell checker & auto-corrector.
+  Currently, only deals with text written in American English.
 ]##
 
 # https://forum.nim-lang.org/t/6833#42762
@@ -47,6 +48,13 @@ var
 proc spell*(word: string): bool = hunspell.spell(word.cstring)
 proc suggest*(word: string): seq[string] = hunspell.suggest(word.cstring).toSeq
 proc stem*(word: string): string = hunspell.stem(hunspell.analyze(word.cstring)).toSeq()[0]
+
+proc root*(word: string): string =
+  ## Get most likely correct version of word.
+  ## Then extract word stem.
+  if spell(word): return word.stem
+  let correct = word.suggest()[0]
+  correct.stem
 
 when isMainModule:
   echo "Spelling of \"Recommendation\" is correct: " & $hunspell.spell("Recommendation".cstring)
