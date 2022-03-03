@@ -7,8 +7,11 @@
 import
   meta,
   apiutils,
+  configurator,
+  cloudor,
   model/[
-    steam
+    steam,
+    tag
   ],
   std/[
     json,
@@ -25,7 +28,13 @@ router requestprocessor:
 
 proc listen*() =
   let
-    port = 1337.Port
-    settings = newSettings(port)
+    name = config.serverName
+    bindAddr = config.serverAddr
+    port = config.serverPort.Port
+    settings = newSettings(
+      appName = name,
+      bindAddr = bindAddr,
+      port = port
+    )
   var srv = initJester(requestprocessor, settings)
   srv.serve
