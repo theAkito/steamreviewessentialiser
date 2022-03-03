@@ -18,7 +18,7 @@ requires "nim       >= 1.6.4"
 requires "puppy     >= 1.0.3"
 requires "nimdbx    >= 0.4.1"
 requires "timestamp >= 0.4.2"
-requires "cppstl >= 0.5.0"
+requires "cppstl    >= 0.5.0"
 requires "jester#2551a8cfce7faa7a60500bf25acc2cc81b79d1b0"
 
 

@@ -7,7 +7,7 @@
 
 import cppstl
 
-const header = "externlib/hunspell/src/hunspell/hunspell.hxx"
+const header = "steamreviewessentialiser/externlib/hunspell/src/hunspell/hunspell.hxx"
 
 type
   HunspellObj {.header: header, importcpp: "Hunspell".} = object
