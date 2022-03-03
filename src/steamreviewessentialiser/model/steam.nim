@@ -26,7 +26,7 @@ type
     total_negative    * : Option[int]
     total_reviews     * : Option[int]
 
-  SteamReviewAutherRes * = ref object
+  SteamReviewAuthorRes * = ref object
     steamid                 * : string
     num_games_owned         * : int64
     num_reviews             * : int64
@@ -37,7 +37,7 @@ type
 
   SteamReviewItemRes * = ref object
     recommendationid            * : string
-    author                      * : SteamReviewAutherRes
+    author                      * : SteamReviewAuthorRes
     language                    * : string
     review                      * : string
     timestamp_created           * : int64

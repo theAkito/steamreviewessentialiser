@@ -29,9 +29,10 @@ Linux
 Before Pre-Alpha. Unstable API.
 
 ## TODO
-* Save state, if review gathering was interrupted by program shutdown.
-* Use spell correction to correctly group similar or same words.
-* Maintain openness to variety of clients on different platforms.
+* ~~Save state, if review gathering was interrupted by program shutdown.~~
+* ~~Use spell correction to correctly group similar or same words.~~
+* ~~Maintain openness to variety of clients on different platforms.~~
+* Filter words like "is", "it", "that", "this", "these", "those"...
 * REST API
 
 ## License
