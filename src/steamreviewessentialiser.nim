@@ -219,11 +219,16 @@ proc saveReviewsAll(ctx: SteamContext) =
   )
   database.commit(ct)
 
+proc run() =
+  #[ Initialise configuration file. ]#
+  if not initConf(configPath): raise OSError.newException("Config file could neither be found nor generated!")
+  listen()
+
 when isMainModule:
   initDb()
   # let ctx = SteamContext(
   #   appid: "730"
   # )
   # ctx.saveReviewsAll()
-  listen()
+  run()
   closeDb()
