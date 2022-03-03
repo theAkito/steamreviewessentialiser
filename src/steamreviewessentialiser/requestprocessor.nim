@@ -8,7 +8,6 @@ import
   meta,
   apiutils,
   configurator,
-  cloudor,
   model/[
     steam,
     tag
