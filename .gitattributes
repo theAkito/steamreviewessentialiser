@@ -1,2 +1,3 @@
 # ---> Vendored Files according to Linguist https://stackoverflow.com/a/26948938/7061105
 simple_request.sh linguist-vendored
+git_init-branch.sh linguist-vendored
