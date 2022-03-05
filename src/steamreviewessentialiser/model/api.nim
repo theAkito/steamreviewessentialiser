@@ -6,6 +6,12 @@ import
 type
   ApiDefect * = object of Defect
 
+  ApiTagCloud * = ref object
+    tags        * : seq[string]    ## Simple list of all tags, but without duplicates.
+    tagsPop     * : seq[string] ## Tags ordered by popularity. tagsPop.low == most popular, whereas tagsPop.high == least popular.
+    tagsLikeDup * : seq[string]    ## Tags, which are different technically, but probably mean the same, most likely due to spelling mistake.
+    language    * : Language           ## Human language used for tag creation.
+
   ApiRequest * = ref object
     version    * : uint           ## API version.
     appid      * : uint32         ## Client has to search for game by string, select the correct game and then the associated appid will be sent to this server.
@@ -16,5 +22,5 @@ type
 
   ApiResponse * = ref object
     appid      * : uint32          ## The appid of the game the Tag Cloud is for.
-    cloud      * : TagCloud        ## Tag Cloud requested for the appid.
+    cloud      * : ApiTagCloud        ## Tag Cloud requested for the appid.
     timestamp  * : string          ## Timestamp as string of the most recent review in the collection used to generate the Tag Cloud. Timestamp is retrieved from the most recent review's `timestamp_created` property.
