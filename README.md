@@ -32,8 +32,8 @@ Before Pre-Alpha. Unstable API.
 * ~~Save state, if review gathering was interrupted by program shutdown.~~
 * ~~Use spell correction to correctly group similar or same words.~~
 * ~~Maintain openness to variety of clients on different platforms.~~
-* Filter words like "is", "it", "that", "this", "these", "those"...
-* REST API
+* ~~Filter words like "is", "it", "that", "this", "these", "those"...~~
+* ~~REST API~~
 
 ## License
 Copyright © 2022  Akito <the@akito.ooo>
