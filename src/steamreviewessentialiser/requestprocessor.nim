@@ -8,22 +8,37 @@ import
   meta,
   apiutils,
   configurator,
+  cloudor,
   model/[
+    api,
+    http,
     steam,
     tag
   ],
   std/[
+    sets,
     json,
     logging,
-    strutils
+    strutils,
+    sequtils
   ],
   pkg/[
+    timestamp,
     jester
   ]
 
 router requestprocessor:
   post "/api":
-    resp pretty(request.body.parseJson), rawHeaderJson
+    let
+      jApiRequest = request.body.parseJson
+      appid = jApiRequest.to(ApiRequest).appid
+      tagCloud = loadTagCloud($appid)
+      apiResponse = ApiResponse(
+        appid: appid,
+        cloud: tagCloud,
+        timestamp: $initTimestamp()
+      )
+    resp pretty(%* apiResponse), rawHeaderJson
 
 proc listen*() =
   let
