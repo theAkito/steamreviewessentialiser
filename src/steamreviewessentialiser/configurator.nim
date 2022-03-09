@@ -12,13 +12,15 @@ import
 
 type
   MasterConfig = object
-    version     * : string
-    maxItems    * : int
-    intervalAPI * : int
+    version     * : string ## Version of this app and its configuration API.
+    maxItems    * : int    ## Maximum amount of reviews to be processed. Retrieval of reviews always starts with the most recent, so you will get the most recent N (defined by maxItems) reviews for the particular game.
+    maxTags     * : int    ## Amount of tags which are loaded and then sent to the client requesting the Tag Cloud. The more tags are loaded, the bigger the cloud can become.
+    intervalAPI * : int    ## The length of the pause between API calls that retrieve Steam reviews in batches, in milliseconds. 10 seconds should be the minimum, to avoid 429s.
     serverName  * : string # App name passed to Jester.
     serverAddr  * : string # Bind address passed to Jester.
     serverPort  * : int    # Port passed to Jester.
-    debug       * : bool
+    adminToken  * : string ## Base64 encoded password to authorise admin actions, like for example, forcing to reload reviews for a game, even though they already exist.
+    debug       * : bool   ## Enable Debug mode.
 
 let
   logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "configurator" & logMsgSuffix)
@@ -31,11 +33,12 @@ let
 
 var
   config* = MasterConfig(
-    version: appVersion, ## Version of this app and its configuration API.
-    intervalAPI: 10_000, ## The length of the pause between API calls that retrieve Steam reviews in batches, in milliseconds. 10 seconds should be the minimum, to avoid 429s.
-    maxItems: 500,       ## Maximum amount of reviews to be processed. Retrieval of reviews always starts with the most recent, so you will get the most recent N (defined by maxItems) reviews for the particular game.
-    serverNAme: "steamreviewessentialiser",
-    serverAddr: "steamreviewessentialiser",
+    version: appVersion,
+    intervalAPI: 10_000,
+    maxItems: 500,
+    maxTags: 30,
+    serverName: "",
+    serverAddr: "",
     serverPort: 50123,
     debug: meta.debug
   )
