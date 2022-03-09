@@ -145,6 +145,14 @@ proc loadDatabaseConfig*(clt: Collection not nil): DatabaseConfig =
 proc loadDatabaseStatus*(clt: Collection not nil): DatabaseStatus =
   loadDatabaseModel(clt, entryNameStatus, DatabaseStatus)
 
+proc loadDatabaseConfig*(cltName: string): DatabaseConfig =
+  let clt = getRefClt(cltName)
+  loadDatabaseModel(clt, entryNameConfig, DatabaseConfig)
+
+proc loadDatabaseStatus*(cltName: string): DatabaseStatus =
+  let clt = getRefClt(cltName)
+  loadDatabaseModel(clt, entryNameStatus, DatabaseStatus)
+
 iterator loadAllReviews*(cltName: string): SteamReviewItemRes =
   let
     clt = getRefClt(cltName)
