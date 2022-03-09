@@ -5,6 +5,7 @@
 import
   meta,
   spellor,
+  filter,
   model/[
     tag
   ],
@@ -19,6 +20,8 @@ import
 
 let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "word" & logMsgSuffix)
 
+func isASCII(input: string): bool = not input.anyIt(not it.isAlphaAscii)
+
 func extractWords(text: openArray[string]): seq[string] =
   for content in text:
     for word in content.split():
@@ -29,7 +32,12 @@ func mapTagToPopularity(words: openArray[string], amount: int = words.len): Orde
     counter: int
     countTable = words.toCountTable
   countTable.sort
-  for word, freq in countTable.pairs:
+  for dirtyWord, freq in countTable.pairs:
+    let word = dirtyWord.strip.stripSigns.toLowerAscii
+    if not word.isASCII: continue
+    if wordsUnnecessary.contains(word): continue
+    if result.hasKey(word): continue
+    if word.len < 3: continue
     counter.inc
     result[word] = freq
     if counter >= amount: return
