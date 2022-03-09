@@ -4,7 +4,6 @@
 
 import helper
 from timestamp import Timestamp
-from tag import TagCloud
 
 type
   DatabaseConfig * = ref object
@@ -20,9 +19,6 @@ type
     recommendationIDs   * : seq[string]  ## A list of recommendationids, contained in this collection. Use, to quickly know which reviews are already known/saved and which are newly composed, i.e. gathered from the API, but not yet contained in this sequence. Length of this sequence must correspond to amount of reviews saved in this collection.
     timestampUpdate     * : Timestamp    ## When was the last time the collection was refreshed with updated versions of reviews.
     timestampComplete   * : Timestamp    ## When was the last time the collection finished gathering all reviews for this particular game.
-
-  DatabaseTagCloud * = ref TagCloud
-
 
 when isMainModule:
   import json
