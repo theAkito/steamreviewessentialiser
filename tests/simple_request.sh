@@ -16,4 +16,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>. #
 #########################################################################
 
-curl -X POST -H "Content-Type: application/json" -d '{"name": "Malcolm", "email": "why@example.com"}' localhost:50123/api && echo
+curl -X POST -H "Content-Type: application/json" -d '{"version": 1, "appid": 730, "clientType": "desktop", "language": "english"}' localhost:50123/api && echo
