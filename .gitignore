@@ -26,6 +26,11 @@ htmldocs/
 /src/steamreviewessentialiser/game
 /src/steamreviewessentialiser/cloudor
 /src/steamreviewessentialiser/spellor
+/steamreviewessentialiser.json
+/tests/simplerequest
+/tests/simple_request.sh
+/tests/generaterequest
+/tests/simple_request_payload.json
 
 
 
@@ -84,4 +89,3 @@ m4/lt~obsolete.m4
 # can automatically generate from config.status script
 # (which is called by configure script))
 Makefile
-steamreviewessentialiser.json
