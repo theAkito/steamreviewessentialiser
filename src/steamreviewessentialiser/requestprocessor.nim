@@ -11,32 +11,35 @@ import
   cloudor,
   model/[
     api,
-    http,
-    steam,
     tag
   ],
   std/[
-    sets,
     json,
+    options,
     logging,
-    strutils,
-    sequtils
+    strutils
   ],
   pkg/[
     timestamp,
     jester
   ]
 
+let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "requestprocessor" & logMsgSuffix)
+
+proc auth(token: string): bool = config.adminToken == token
+
 router requestprocessor:
   post "/api":
     let
       jApiRequest = request.body.parseJson
-      appid = jApiRequest.to(ApiRequest).appid
-      tagCloud = loadTagCloud($appid)
+      apiRequest = jApiRequest.to(ApiRequest)
+      appid = apiRequest.appid
+      token = apiRequest.admin.get().token
+      forceFresh = if token.auth: apiRequest.admin.get().forceFresh.get(false) else: false
+      tagCloud = loadTagCloud($appid, forceFresh)
       apiResponse = ApiResponse(
         appid: appid,
-        cloud: tagCloud,
-        timestamp: $initTimestamp()
+        cloud: tagCloud
       )
     resp pretty(%* apiResponse), rawHeaderJson
 
