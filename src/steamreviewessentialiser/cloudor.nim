@@ -5,9 +5,9 @@
 import
   meta,
   word,
-  filter,
   database,
   configurator,
+  reviewer,
   model/[
     steam,
     tag
@@ -36,6 +36,9 @@ proc loadMostUsed(appid: string): OrderedTable[string, int] =
 proc loadMostUsedRoots(appid: string): OrderedTable[string, int] =
   appid.loadAllReviews.extractReviews.extractMostUsedRoots(config.maxTags)
 
-proc loadTagCloud*(appid: string): TagCloud =
+proc loadTagCloud*(appid: string, forceFresh: bool): TagCloud =
+  let fresh = forceFresh or not appid.cltExists
+  if fresh: result.reviewAmount = SteamContext(appId: appid).saveReviewsAll()
   result = appid.loadMostUsedRoots.toTagCloud
   result.config = loadDatabaseConfig(appid)
+  result.timestampLatest = "TODO"

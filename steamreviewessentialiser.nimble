@@ -54,6 +54,8 @@ task dbuild, "Debug Build project.":
             --out:steamreviewessentialiser \
             src/steamreviewessentialiser
        """
+task test, "Runs the test suite":
+  exec "nim c -r tests/test.nim ; rm tests/test"
 task makecfg, "Create nim.cfg for optimized builds.":
   exec "nim tasks/cfg_optimized.nims"
 task clean, "Removes nim.cfg.":

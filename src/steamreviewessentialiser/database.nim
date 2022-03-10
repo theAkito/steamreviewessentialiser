@@ -111,6 +111,7 @@ proc makeStatusForDB*(
 # General
 proc initDb*() = db = loc.openDatabase(flags = flags)
 proc getRefClt*(name: string): Collection not nil = db.openCollection(name, collFlags, collKeyType, collValType)
+proc cltExists*(name: string): bool = db.openCollectionOrNil(name, {}, collKeyType, collValType) != nil
 
 # Write
 proc begin*(clt: Collection not nil): CollectionTransaction = clt.beginTransaction()
