@@ -11,15 +11,13 @@ import
   std/[
     json,
     logging,
-    strutils,
     strformat
   ],
   pkg/[
     puppy
   ]
 
-let
-  logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "retriever" & logMsgSuffix)
+let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "retriever" & logMsgSuffix)
 
 proc retrieve*(req: Request, typ: typedesc): typ {.raises: [].} =
   let

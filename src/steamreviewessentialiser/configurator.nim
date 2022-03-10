@@ -24,18 +24,18 @@ type
 
 let
   logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "configurator" & logMsgSuffix)
+  defaultMaxItems = 5000
+var
   dbConfig* = DatabaseConfig(
-    maxItems: 500,
+    maxItems: defaultMaxItems,
     reviewType: ReviewType.all,
     purchaseType: PurchaseType.all,
     language: Language.english
   )
-
-var
   config* = MasterConfig(
     version: appVersion,
     intervalAPI: 10_000,
-    maxItems: 500,
+    maxItems: defaultMaxItems,
     maxTags: 30,
     serverName: "",
     serverAddr: "",
@@ -64,6 +64,7 @@ proc initConf*(path = configPath, name = configName): bool =
   if configAlreadyExists:
     logger.log(lvlDebug, "Config already exists! Not generating new one.")
     config = pathFull.parseFile().to(MasterConfig)
+    dbConfig.maxItems = config.maxItems
     return true
   try:
     genDefaultConfig(path, name)

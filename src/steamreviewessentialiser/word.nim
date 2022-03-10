@@ -6,9 +6,6 @@ import
   meta,
   spellor,
   filter,
-  model/[
-    tag
-  ],
   std/[
     json,
     logging,
@@ -20,7 +17,7 @@ import
 
 let logger = newConsoleLogger(defineLogLevel(), logMsgPrefix & logMsgInter & "word" & logMsgSuffix)
 
-func isASCII(input: string): bool = not input.anyIt(not it.isAlphaAscii)
+func isASCII(input: string): bool = input.allIt(it.isAlphaAscii)
 
 func extractWords(text: openArray[string]): seq[string] =
   for content in text:

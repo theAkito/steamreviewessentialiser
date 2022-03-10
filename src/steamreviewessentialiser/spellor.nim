@@ -10,7 +10,7 @@ type
 
 # Import C
 proc newHunspell(affpath: cstring, dpath: cstring): ptr Hunhandle {.header: header, importc: "Hunspell_create".}
-proc addDic(hunspell: ptr Hunhandle, dpath: cstring): cint {.header: header, importc: "Hunspell_add_dic".}
+#proc addDic(hunspell: ptr Hunhandle, dpath: cstring): cint {.header: header, importc: "Hunspell_add_dic".}
 proc spell(hunspell: ptr Hunhandle, word: cstring): bool {.header: header, importc: "Hunspell_spell".}
 proc suggest(hunspell: ptr Hunhandle, resultArray: ptr cstringArray, word: cstring): cint {.header: header, importc: "Hunspell_suggest".}
 proc analyze(hunspell: ptr Hunhandle, resultArray: ptr cstringArray, word: cstring): cint {.header: header, importc: "Hunspell_analyze".}

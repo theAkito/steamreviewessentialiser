@@ -6,7 +6,7 @@ type
 
   SteamContext * = ref object
     appId         * : string
-    cursor        * : string
+    cursor        * : string ## Is managed automatically. Providing the appId is enough.
 
   SteamReviewQuery * = ref object
     appid         * : string
