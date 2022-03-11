@@ -36,7 +36,15 @@ router requestprocessor:
       appid = apiRequest.appid
       token = apiRequest.admin.get().token
       forceFresh = if token.auth: apiRequest.admin.get().forceFresh.get(false) else: false
-      tagCloud = loadTagCloud($appid, forceFresh)
+      tagCloud = loadTagCloud(
+        $appid,
+        forceFresh,
+        apiRequest.admin.get().amountReview.get(), #TODO Try-Catch this.
+        apiRequest.admin.get().amountTag.get(), #TODO Try-Catch this.
+        apiRequest.admin.get().reviewType.get(), #TODO Try-Catch this.
+        apiRequest.admin.get().purchaseType.get(), #TODO Try-Catch this.
+        apiRequest.admin.get().language.get() #TODO Try-Catch this.
+      )
       apiResponse = ApiResponse(
         appid: appid,
         cloud: tagCloud
