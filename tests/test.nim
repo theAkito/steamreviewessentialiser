@@ -6,9 +6,13 @@ import
   nimdbx,
   simplerequest,
   os,
-  osproc
+  osproc,
+  strutils
 
 let logger = newConsoleLogger(lvlDebug, logMsgPrefix & logMsgInter & "tester" & logMsgSuffix)
 
-makeRequest()
+makeRequest(
+  srvStart = try: commandLineParams()[0].parseBool except: false,
+  forceFresh = try: commandLineParams()[1].parseBool except: false
+)
 

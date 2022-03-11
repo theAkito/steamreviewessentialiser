@@ -18,24 +18,27 @@ import
     api
   ]
 
-template terminateSrv() = srv.terminate()
+var srv: Process
+
+template terminateSrv() =
+  if srvStart: srv.terminate() else: discard
 
 proc runServer(): Process =
   discard execCmdEx("""nimble dbuild""")
   startProcess(command = "steamreviewessentialiser", workingDir = "", options = { poStdErrToStdOut, poParentStreams })
 
-proc makeRequest*() =
+proc makeRequest*(srvStart: bool, forceFresh: bool) =
   echo "Starting Server..."
-  let srv = runServer()
+  if srvStart: srv = runServer()
   echo "Waiting for Server to finish starting up..."
-  sleep 10_000 ## Wait for the server to finish starting up.
+  if srvStart: sleep 10_000 ## Wait for the server to finish starting up.
   echo "Generate API request..."
   generateRequest()
   let
     apiRequest = "tests/simple_request_payload.json".readFile.parseJson.to(ApiRequest)
     apiRequestAdmin = apiRequest.admin
   if apiRequestAdmin.isSome:
-    apiRequestAdmin.get().forceFresh = try: commandLineParams()[0].parseBool.some except: false.some
+    apiRequestAdmin.get().forceFresh = forceFresh.some
   let
     req = Request(
       url: parseUrl("localhost:50123/api"),
@@ -60,4 +63,4 @@ proc makeRequest*() =
       timeFinish = now()
     echo &"Request took {timeFinish - timeStart}."
   terminateSrv()
-  if waitForExit(srv) == 143: echo "Success!"
+  if srvStart and waitForExit(srv) == 143: echo "Success!"
