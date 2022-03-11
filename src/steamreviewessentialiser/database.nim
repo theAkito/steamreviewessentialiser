@@ -7,6 +7,7 @@ import
     helper
   ],
   std/[
+    times,
     json,
     sets,
     sequtils,
@@ -83,7 +84,8 @@ proc makeStatus(
   complete: bool,
   recommendationIDs: HashSet[string],
   tagCloudAvailable: bool = false,
-  cursorLatest: string = "*"
+  cursorLatest: string = "*",
+  timestampLatest: Timestamp
 ): DatabaseStatus =
   let timestamp = initTimestamp()
   DatabaseStatus(
@@ -91,6 +93,7 @@ proc makeStatus(
     tagCloudAvailable: tagCloudAvailable,
     cursorLatest: cursorLatest,
     recommendationIDs: recommendationIDs.toSeq,
+    timestampLatest: timestampLatest,
     timestampUpdate: timestamp,
     timestampComplete: if complete: timestamp else: defaultTimestamp,
   )
@@ -99,13 +102,15 @@ proc makeStatusForDB*(
   complete: bool,
   recommendationIDs: HashSet[string],
   tagCloudAvailable: bool = false,
-  cursorLatest: string = "*"
+  cursorLatest: string = "*",
+  timestampLatest: Timestamp
 ): string =
   $ %* makeStatus(
     complete,
     recommendationIDs,
     tagCloudAvailable,
-    cursorLatest
+    cursorLatest,
+    timestampLatest
   )
 
 # General
@@ -136,6 +141,7 @@ template loadDatabaseModel(clt: untyped, entryName: untyped, typ: typedesc): unt
     let status = snap.get(entryName)
     result = status.parseJson().to(typ)
   except:
+    logger.log(lvlError, "Unable to parse DatabaseStatus loaded from Database!")
     result = nil
   finally:
     snap.finishShow()

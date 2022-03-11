@@ -17,6 +17,7 @@ type
     tagCloudAvailable   * : bool         ## Whether the generation of the Tag Cloud was finished and is available.
     cursorLatest        * : string       ## Which cursor position to continue gathering from, if gathering wasn't finished, yet.
     recommendationIDs   * : seq[string]  ## A list of recommendationids, contained in this collection. Use, to quickly know which reviews are already known/saved and which are newly composed, i.e. gathered from the API, but not yet contained in this sequence. Length of this sequence must correspond to amount of reviews saved in this collection.
+    timestampLatest     * : Timestamp    ## Timestamp of the most recent review in the collection. Timestamp is retrieved from the most recent review's `timestamp_created` property.
     timestampUpdate     * : Timestamp    ## When was the last time the collection was refreshed with updated versions of reviews.
     timestampComplete   * : Timestamp    ## When was the last time the collection finished gathering the amount of requested reviews for this particular game.
 

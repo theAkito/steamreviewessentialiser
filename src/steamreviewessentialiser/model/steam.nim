@@ -1,3 +1,4 @@
+import timestamp
 from json import JsonNode
 from options import Option
 
@@ -68,3 +69,5 @@ type
 
   SteamAppListRes * = ref object
     applist * : SteamAppsRes
+
+func steamTimestampToTimestamp*(steamTimestamp: int64): Timestamp = initTimestamp(steamTimestamp * 1_000_000_000)
