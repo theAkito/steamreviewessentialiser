@@ -26,7 +26,10 @@ Linux
 * Maintain Simplicity!
 
 ## Project Status
-Before Pre-Alpha. Unstable API.
+Alpha. Unstable API.
+
+Server is working so far.
+At this moment, retrieval of Tag Clouds via API of the server has to be concluded manually through API requests, by using cURL or similar HTTP clients.
 
 ## TODO
 * ~~Save state, if review gathering was interrupted by program shutdown.~~

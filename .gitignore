@@ -21,15 +21,17 @@ htmldocs/
 /steamreviewessentialiser
 /*.log
 /database
+/src/steamreviewessentialiser/utils.nim
 /src/steamreviewessentialiser/database
 /src/steamreviewessentialiser/model/database
 /src/steamreviewessentialiser/game
 /src/steamreviewessentialiser/cloudor
 /src/steamreviewessentialiser/spellor
 /steamreviewessentialiser.json
+/tests/test
 /tests/simplerequest
-/tests/simple_request.sh
 /tests/generaterequest
+/tests/simple_request.sh
 /tests/simple_request_payload.json
 
 
