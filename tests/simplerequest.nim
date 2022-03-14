@@ -28,10 +28,13 @@ proc runServer(): Process =
   startProcess(command = "steamreviewessentialiser", workingDir = "", options = { poStdErrToStdOut, poParentStreams })
 
 proc makeRequest*(srvStart: bool, forceFresh: bool) =
-  echo "Starting Server..."
-  if srvStart: srv = runServer()
-  echo "Waiting for Server to finish starting up..."
-  if srvStart: sleep 10_000 ## Wait for the server to finish starting up.
+  if srvStart:
+    echo "Starting Server..."
+    srv = runServer()
+    echo "Waiting for Server to finish starting up..."
+    sleep 10_000 ## Wait for the server to finish starting up.
+  else:
+    echo "NOT starting server. Server is expected to be running, already."
   echo "Generate API request..."
   generateRequest()
   let
@@ -59,8 +62,7 @@ proc makeRequest*(srvStart: bool, forceFresh: bool) =
     else:
       echo body
       echo()
-    let
-      timeFinish = now()
+    let timeFinish = now()
     echo &"Request took {timeFinish - timeStart}."
   terminateSrv()
   if srvStart and waitForExit(srv) == 143: echo "Success!"
