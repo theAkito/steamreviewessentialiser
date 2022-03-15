@@ -1,5 +1,3 @@
-from helper import
-  Language
 from tables import
   OrderedTable
 from database import
