@@ -37,6 +37,9 @@ At this moment, retrieval of Tag Clouds via API of the server has to be conclude
 * ~~Maintain openness to variety of clients on different platforms.~~
 * ~~Filter words like "is", "it", "that", "this", "these", "those"...~~
 * ~~REST API~~
+* Add Desktop Client
+* Add Android Client
+* Add Web Client
 
 ## License
 Copyright © 2022  Akito <the@akito.ooo>
