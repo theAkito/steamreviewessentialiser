@@ -37,9 +37,3 @@ when isMainModule:
   logger.log(lvlInfo, "Starting with the following configuration:\n" & pretty(%* config))
   run()
   closeDb()
-else:
-  proc master*() =
-    initDb()
-    logger.log(lvlInfo, "Starting with the following configuration:\n" & pretty(%* config))
-    run()
-    closeDb()
