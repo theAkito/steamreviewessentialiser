@@ -14,12 +14,9 @@ import
     tag
   ],
   std/[
-    json,
     logging,
-    strutils,
     sequtils,
-    tables,
-    sets
+    tables
   ],
   pkg/[
     timestamp
