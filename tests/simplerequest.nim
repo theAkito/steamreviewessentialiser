@@ -14,9 +14,12 @@ import
   os,
   osproc,
   generaterequest,
+  logging,
   model/[
     api
   ]
+
+let logger = newConsoleLogger(lvlDebug, logMsgPrefix & logMsgInter & "simplerequest" & logMsgSuffix)
 
 var srv: Process
 
@@ -29,13 +32,13 @@ proc runServer(): Process =
 
 proc makeRequest*(srvStart: bool, forceFresh: bool) =
   if srvStart:
-    echo "Starting Server..."
+    logger.log(lvlInfo, "Starting Server...")
     srv = runServer()
-    echo "Waiting for Server to finish starting up..."
+    logger.log(lvlInfo, "Waiting for Server to finish starting up...")
     sleep 10_000 ## Wait for the server to finish starting up.
   else:
-    echo "NOT starting server. Server is expected to be running, already."
-  echo "Generate API request..."
+    logger.log(lvlInfo, "NOT starting server. Server is expected to be running, already.")
+  logger.log(lvlInfo, "Generate API request...")
   generateRequest()
   let
     apiRequest = "tests/simple_request_payload.json".readFile.parseJson.to(ApiRequest)
@@ -55,14 +58,14 @@ proc makeRequest*(srvStart: bool, forceFresh: bool) =
       resp = req.fetch()
       body = resp.body
     if body.isEmptyOrWhitespace:
-      echo "Response is empty. Is the server running?"
-      echo "Error occurred when trying to connect to the server: " & resp.error
+      logger.log(lvlError, "Response is empty. Is the server running?")
+      logger.log(lvlError, "Error occurred when trying to connect to the server: " & resp.error)
       terminateSrv()
       break
     else:
-      echo body
+      logger.log(lvlNotice, body)
       echo()
     let timeFinish = now()
     echo &"Request took {timeFinish - timeStart}."
   terminateSrv()
-  if srvStart and waitForExit(srv) == 143: echo "Success!"
+  if srvStart and waitForExit(srv) == 143: logger.log(lvlInfo, "Successfully terminated server!")
