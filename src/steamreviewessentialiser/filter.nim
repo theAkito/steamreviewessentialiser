@@ -25,6 +25,7 @@ const
     "always",
     "an",
     "and",
+    "any",
     "are",
     "as",
     "at",
